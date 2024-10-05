@@ -3,14 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:news_app/Model/news_channel_headlines_model.dart';
+import 'package:news_app/View/categories_screen.dart';
 import 'package:news_app/view_model/news_view_model.dart';
+
+import '../Model/categories_news_model.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
-enum FilterList{ bbcNews, aryNews, independent, reuters, cnn, alJazeera}
+enum FilterList{ bbcNews, aryNews, abcNews, entertainmentWeekly, cnn, alJazeera, financialPost, infoMoney}
 
 class _HomeScreenState extends State<HomeScreen> {
   NewsViewModel newsViewModel = NewsViewModel();
@@ -28,7 +31,9 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 30,
             width: 30,
           ),
-          onPressed: (){},
+          onPressed: (){
+            Navigator.push(context,MaterialPageRoute(builder: (context)=>CategoriesScreen()));
+          },
         ),
         title: Text('News', style: TextStyle(fontSize: 30,fontWeight: FontWeight.w900),),
         centerTitle: true,
@@ -49,11 +54,17 @@ class _HomeScreenState extends State<HomeScreen> {
               if(FilterList.alJazeera.name == item.name){
                 name ='al-jazeera-english';
               }
-              if(FilterList.independent.name == item.name){
-                name ='independent';
+              if(FilterList.abcNews.name == item.name){
+                name ='abc-news';
               }
-              if(FilterList.reuters.name == item.name){
-                name ='reuters';
+              if(FilterList.entertainmentWeekly.name == item.name){
+                name ='entertainment-weekly';
+              }
+              if(FilterList.financialPost.name == item.name){
+                name ='financial-post';
+              }
+              if(FilterList.infoMoney.name == item.name){
+                name ='info-money';
               }
               setState(() {
                 selectedMenu = item;
@@ -70,14 +81,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     value: FilterList.cnn,
                     child: Text('CNN')),
                 PopupMenuItem<FilterList>(
-                    value: FilterList.independent,
-                    child: Text('Independent')),
+                    value: FilterList.abcNews,
+                    child: Text('ABC News')),
                 PopupMenuItem<FilterList>(
                     value: FilterList.alJazeera,
                     child: Text('AlJazeera')),
                 PopupMenuItem<FilterList>(
-                    value: FilterList.reuters,
-                    child: Text('Reuters'))
+                    value: FilterList.entertainmentWeekly,
+                    child: Text('Entertainment Weekly')),
+                PopupMenuItem<FilterList>(
+                    value: FilterList.financialPost,
+                    child: Text('Financial Post')),
+                PopupMenuItem<FilterList>(
+                    value: FilterList.infoMoney,
+                    child: Text('Info Money'))
               ]
           )
         ],
@@ -101,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 else{
                   return ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: snapshot.data!.articles!.length,
+                    itemCount: snapshot.data?.articles!.length,
                       itemBuilder: (context,index){
                       DateTime dateTime = DateTime.parse(snapshot.data!.articles![index].publishedAt.toString());
                         return SizedBox(
@@ -194,7 +211,90 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               },
             )
-          )
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: FutureBuilder<CategoriesNewsModel>(
+              future: newsViewModel.fetchCategoriesNewsApi('General'),
+              builder: (BuildContext context,snapshot){
+                if(snapshot.connectionState == ConnectionState.waiting){
+                  return Center(
+                    child: SpinKitCircle(
+                      size: 50,
+                      color: Colors.blue,
+                    ),
+                  );
+                }
+                else{
+                  return ListView.builder(
+                    shrinkWrap: true,
+                      scrollDirection: Axis.vertical,
+                      itemCount: snapshot.data?.articles!.length,
+                      itemBuilder: (context,index){
+                        DateTime dateTime = DateTime.parse(snapshot.data!.articles![index].publishedAt.toString());
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 15),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: CachedNetworkImage(
+                                    imageUrl: snapshot.data!.articles![index].urlToImage.toString(),
+                                    fit: BoxFit.cover,
+                                    height: height * 0.18,
+                                    width: width * 0.3,
+                                    placeholder: (context, url)=>Container(child: spinKit2,),
+                                    errorWidget: (context, url, error)=>Icon(Icons.error_outline,color: Colors.red,)
+                                ),
+                              ),
+                              Flexible(
+                                  fit: FlexFit.loose,
+                                  child: Container(
+                                    height: height * 0.18,
+                                    padding: EdgeInsets.only(left: 15),
+                                    child: Column(
+                                      children: [
+                                        Text(snapshot.data!.articles![index].title.toString(),
+                                          maxLines: 3,
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              color: Colors.black54,
+                                              fontWeight: FontWeight.w700
+                                          ),
+                                        ),
+                                        Spacer(),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(snapshot.data!.articles![index].source!.name.toString(),
+                                              style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.black54,
+                                                  fontWeight: FontWeight.w600
+                                              ),
+                                            ),
+                                            Text(format.format(dateTime),
+                                              style: TextStyle(
+                                                  fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+
+                                        )
+                                      ],
+                                    ),
+                                  ))
+                            ],
+                          ),
+                        );
+                      }
+                  );
+                }
+              },
+            ),
+          ),
+
         ],
       ),
     );
