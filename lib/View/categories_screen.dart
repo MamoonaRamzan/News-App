@@ -6,6 +6,7 @@ import 'package:news_app/Model/categories_news_model.dart';
 
 import '../view_model/news_view_model.dart';
 import 'home_screen.dart';
+import 'news_detail_screen.dart';
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
 
@@ -88,60 +89,72 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                         itemCount: snapshot.data?.articles!.length,
                         itemBuilder: (context,index){
                           DateTime dateTime = DateTime.parse(snapshot.data!.articles![index].publishedAt.toString());
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 15),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(15),
-                                  child: CachedNetworkImage(
-                                      imageUrl: snapshot.data!.articles![index].urlToImage.toString(),
-                                      fit: BoxFit.cover,
-                                      height: height * 0.18,
-                                      width: width * 0.3,
-                                      placeholder: (context, url)=>Container(child: spinKit2,),
-                                      errorWidget: (context, url, error)=>Icon(Icons.error_outline,color: Colors.red,)
+                          return InkWell(
+                            onTap:(){
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=>NewsDetailScreen(
+                                  newsImage: snapshot.data!.articles![index].urlToImage.toString(),
+                                  newsTitle: snapshot.data!.articles![index].title.toString(),
+                                  newsDate: format.format(dateTime),
+                                  author: snapshot.data!.articles![index].author.toString(),
+                                  description: snapshot.data!.articles![index].description.toString(),
+                                  source: snapshot.data!.articles![index].source!.name.toString(),
+                                  content: snapshot.data!.articles![index].content.toString())));
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 15),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(15),
+                                    child: CachedNetworkImage(
+                                        imageUrl: snapshot.data!.articles![index].urlToImage.toString(),
+                                        fit: BoxFit.cover,
+                                        height: height * 0.18,
+                                        width: width * 0.3,
+                                        placeholder: (context, url)=>Container(child: spinKit2,),
+                                        errorWidget: (context, url, error)=>Icon(Icons.error_outline,color: Colors.red,)
+                                    ),
                                   ),
-                                ),
-                                Flexible(
-                                  fit: FlexFit.loose,
-                                    child: Container(
-                                      height: height * 0.18,
-                                      padding: EdgeInsets.only(left: 15),
-                                      child: Column(
-                                       children: [
-                                         Text(snapshot.data!.articles![index].title.toString(),
-                                           maxLines: 3,
-                                           style: TextStyle(
-                                             fontSize: 15,
-                                             color: Colors.black54,
-                                             fontWeight: FontWeight.w700
+                                  Flexible(
+                                    fit: FlexFit.loose,
+                                      child: Container(
+                                        height: height * 0.18,
+                                        padding: EdgeInsets.only(left: 15),
+                                        child: Column(
+                                         children: [
+                                           Text(snapshot.data!.articles![index].title.toString(),
+                                             maxLines: 3,
+                                             style: TextStyle(
+                                               fontSize: 15,
+                                               color: Colors.black54,
+                                               fontWeight: FontWeight.w700
+                                             ),
                                            ),
-                                         ),
-                                         Spacer(),
-                                         Row(
-                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                           children: [
-                                             Text(snapshot.data!.articles![index].source!.name.toString(),
-                                               style: TextStyle(
-                                                   fontSize: 12,
-                                                   color: Colors.black54,
-                                                   fontWeight: FontWeight.w600
+                                           Spacer(),
+                                           Row(
+                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                             children: [
+                                               Text(snapshot.data!.articles![index].source!.name.toString(),
+                                                 style: TextStyle(
+                                                     fontSize: 12,
+                                                     color: Colors.black54,
+                                                     fontWeight: FontWeight.w600
+                                                 ),
                                                ),
-                                             ),
-                                             Text(format.format(dateTime),
-                                               style: TextStyle(
-                                                   fontSize: 12,
+                                               Text(format.format(dateTime),
+                                                 style: TextStyle(
+                                                     fontSize: 12,
+                                                 ),
                                                ),
-                                             ),
-                                           ],
+                                             ],
 
-                                         )
-                                       ],
-                                      ),
-                                    ))
-                              ],
+                                           )
+                                         ],
+                                        ),
+                                      ))
+                                ],
+                              ),
                             ),
                           );
                         }
